@@ -1,0 +1,64 @@
+Simulation Software: Inskape
+
+#include <AT89S52.h>
+#define FOSC 11059200
+#define TCLK FOSC/12
+#define SCLK TCLK/32
+#define TRIG P2_7
+#define ECHO P2_6
+#define relay P2_5
+void baud_rate(int);
+int get_distance(void);
+void main()
+{
+baud_rate(9600);
+while(1)
+{
+ char dist1,dist2;
+ dist1=get_distance();
+ delay(5);
+ dist2=get_distance();
+ if((dist1-dist2)>1)
+ {
+ P2_0=1; 
+ relay=1;
+ delay(20000);
+ }
+ delay(10);
+}
+}
+void baud_rate(int baud)
+{
+char b;
+SCON=0X50;
+TMOD=(TMOD&0X0F)|0x20;
+b=(0xFF-(SCLK/baud))+1;
+TH1=b;
+TL1=b;
+TR1=1;
+}
+int get_distance(void)
+{
+int ultra_dist;
+char ultra_q;
+TRIG=0;
+ECHO=1;
+TR0=0;
+TMOD=(TMOD&0xF0)|(0x01);
+TH0=0x00;
+TL0=0x00;
+TRIG=1;
+for(ultra_q=0;ultra_q<10;ultra_q++)
+{}
+TRIG=0;
+while(ECHO==0)
+{
+}
+TR0=1;
+while(ECHO==1)
+{
+}
+TR0=0;
+ultra_dist=((TH0*256)+TL0)/54;
+8return ultra_dist;
+}
